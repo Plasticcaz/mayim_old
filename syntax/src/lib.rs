@@ -22,13 +22,39 @@ mod tests {
     // TODO(zac): Write tests for various errors.
 
     #[test]
+    fn should_parse_literal_expressions() {
+        let source = "42 3.14 true false";
+
+        let mut expressions = parse(tokenize(FILENAME, source)).into_iter();
+
+        match expressions.next().unwrap() {
+            Expression::Literal((_, Literal::Integer(literal))) => assert_eq!(&literal, "42"),
+            _ => assert!(false),
+        }
+
+        match expressions.next().unwrap() {
+            Expression::Literal((_, Literal::Decimal(literal))) => assert_eq!(&literal, "3.14"),
+            _ => assert!(false),
+        }
+
+        match expressions.next().unwrap() {
+            Expression::Literal((_, Literal::Boolean(literal))) => assert_eq!(&literal, "true"),
+            _ => assert!(false),
+        }
+
+        match expressions.next().unwrap() {
+            Expression::Literal((_, Literal::Boolean(literal))) => assert_eq!(&literal, "false"),
+            _ => assert!(false),
+        }
+    }
+
+    #[test]
     fn should_parse_binding_declaration() {
         let source = "let x := 3";
 
         let top_level = parse(tokenize(FILENAME, source));
 
         let top = &top_level[0];
-        dbg!(top);
         if let Expression::BindingDeclaration {
             identifier: (_, identifier),
             expression,

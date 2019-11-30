@@ -9,9 +9,6 @@ pub struct Located<T: fmt::Debug> {
 
 impl<T: fmt::Debug> Located<T> {
     pub fn new(location: Location, data: T) -> Located<T> {
-        Located {
-            location,
-            data
-        }
+        Located { location, data }
     }
 }

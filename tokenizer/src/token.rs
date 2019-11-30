@@ -15,6 +15,7 @@ pub enum Token {
     Identifier(Atom),
     Integer(Atom),
     Decimal(Atom),
+    Boolean(Atom),
     Let,
     Assign,
 }

@@ -7,7 +7,7 @@
 //! However, this module is internal to this crate. The end user should just be able to call the
 //! top-level `tokenize` function in lib.rs, and not care about this implementation detail.
 //!
-use crate::{Atom, Location, Token, Located};
+use crate::{Atom, Located, Location, Token};
 use std::{iter::Peekable, str::Chars};
 
 #[derive(Debug)]
@@ -42,6 +42,7 @@ impl<'src> Tokenizer<'src> {
                 let lexeme = &self.source[start..self.index];
                 let kind = match lexeme {
                     "let" => Token::Let,
+                    "true" | "false" => Token::Boolean(Atom::from(lexeme)),
                     _ => Token::Identifier(Atom::from(lexeme)),
                 };
 

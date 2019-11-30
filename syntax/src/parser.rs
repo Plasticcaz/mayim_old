@@ -1,13 +1,13 @@
 use crate::{Expression, Literal};
 use std::{iter::Peekable, vec::IntoIter};
-use tokenizer::{Location, Located, Token};
+use tokenizer::{Located, Location, Token};
 
 pub(crate) type Tokens = Peekable<IntoIter<Located<Token>>>;
 
 pub(crate) fn parse(tokens: Vec<Located<Token>>) -> Vec<Expression> {
     let tokens = &mut tokens.into_iter().peekable();
     let mut top_level = Vec::new();
-    while let Some(Located { data: peeked, ..}) = tokens.peek() {
+    while let Some(Located { data: peeked, .. }) = tokens.peek() {
         if *peeked != Token::EndOfFile {
             let expression = parse_expression(tokens);
             top_level.push(expression);
@@ -26,8 +26,16 @@ pub(crate) fn parse_expression(tokens: &mut Tokens) -> Expression {
         } => parse_binding_declaration(tokens, location),
         Located {
             location,
+            data: Token::Decimal(atom),
+        } => Expression::Literal((location, Literal::Decimal(atom))),
+        Located {
+            location,
             data: Token::Integer(atom),
         } => Expression::Literal((location, Literal::Integer(atom))),
+        Located {
+            location,
+            data: Token::Boolean(atom),
+        } => Expression::Literal((location, Literal::Boolean(atom))),
         Located {
             location,
             data: unexpected,

@@ -4,10 +4,10 @@
 
 pub use string_cache::DefaultAtom as Atom;
 
-pub use crate::{location::Location, located::Located, token::Token};
+pub use crate::{located::Located, location::Location, token::Token};
 
-mod location;
 mod located;
+mod location;
 mod token;
 mod tokenizer;
 
@@ -22,7 +22,7 @@ pub fn tokenize(filename: &str, source: &str) -> Vec<Located<Token>> {
 mod tests {
     use std::vec::IntoIter;
 
-    use super::{tokenize, Atom, Token, Located};
+    use super::{tokenize, Atom, Located, Token};
 
     const FILENAME: &str = "test.mayim";
 

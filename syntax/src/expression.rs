@@ -25,4 +25,6 @@ pub enum Expression {
 #[derive(Debug, Eq, PartialEq)]
 pub enum Literal {
     Integer(Atom),
+    Decimal(Atom),
+    Boolean(Atom),
 }
