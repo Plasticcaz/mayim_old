@@ -53,6 +53,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "syntax"
+version = "0.1.0"
+dependencies = [
+ "tokenizer 0.1.0",
+]
+
+[[package]]
 name = "tokenizer"
 version = "0.1.0"
 dependencies = [

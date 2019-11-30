@@ -66,9 +66,7 @@ impl<'src> Tokenizer<'src> {
 
                 tokens.push(Token::new(location, kind));
             } else {
-                let kind = if self.eat(";") {
-                    TokenKind::Semicolon
-                } else if self.eat(":=") {
+                let kind = if self.eat(":=") {
                     TokenKind::Assign
                 } else {
                     self.advance();

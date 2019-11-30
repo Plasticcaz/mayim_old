@@ -32,15 +32,14 @@ mod tests {
     }
 
     #[test]
-    fn should_tokenize_let_statement() {
-        let source = "let x := 3;";
+    fn should_tokenize_let_expression() {
+        let source = "let x := 3";
         let tokens = &mut tokenize(FILENAME, source).into_iter();
 
         assert_next_is(tokens, TokenKind::Let);
         assert_next_is(tokens, TokenKind::Identifier(Atom::from("x")));
         assert_next_is(tokens, TokenKind::Assign);
         assert_next_is(tokens, TokenKind::Integer(Atom::from("3")));
-        assert_next_is(tokens, TokenKind::Semicolon);
         assert_next_is(tokens, TokenKind::EndOfFile);
         assert!(tokens.next().is_none());
     }

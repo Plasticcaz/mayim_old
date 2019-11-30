@@ -16,5 +16,4 @@ pub enum TokenKind {
     Decimal(Atom),
     Let,
     Assign,
-    Semicolon,
 }
