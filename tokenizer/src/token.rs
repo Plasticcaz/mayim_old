@@ -1,26 +1,20 @@
-use crate::{Location, TokenKind};
+use string_cache::DefaultAtom as Atom;
 
 ///
 /// A `Token` is an individual lexeme in source file that has been identified as having
 /// particular importance to the mayim compiler.
 ///
-/// It has a type or `kind`, which informs us what this lexeme represents, and a `location`, which
-/// tells us where, in which source file this lexeme came from.
+/// Certain `Token`s contain an Atom which can be used to distinguish one such token from another.
+/// For instance `Token::Identifier(_)` contains an `Atom` which contains the particular
+/// identifier that this token contains.
 ///
-#[derive(Debug, Clone)]
-pub struct Token {
-    ///
-    /// Where in which source file this `Token` was found.
-    ///
-    pub location: Location,
-    ///
-    /// The type, or `kind` of token this is.
-    ///
-    pub kind: TokenKind,
-}
-
-impl Token {
-    pub fn new(location: Location, kind: TokenKind) -> Token {
-        Token { location, kind }
-    }
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum Token {
+    EndOfFile,
+    Unknown(Atom),
+    Identifier(Atom),
+    Integer(Atom),
+    Decimal(Atom),
+    Let,
+    Assign,
 }

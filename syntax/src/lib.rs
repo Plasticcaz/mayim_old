@@ -6,9 +6,9 @@ mod expression;
 mod parser;
 
 pub use crate::expression::{Expression, Literal};
-use tokenizer::Token;
+use tokenizer::{Located, Token};
 
-pub fn parse(tokens: Vec<Token>) -> Vec<Expression> {
+pub fn parse(tokens: Vec<Located<Token>>) -> Vec<Expression> {
     parser::parse(tokens)
 }
 

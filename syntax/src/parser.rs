@@ -1,14 +1,14 @@
 use crate::{Expression, Literal};
 use std::{iter::Peekable, vec::IntoIter};
-use tokenizer::{Location, Token, TokenKind};
+use tokenizer::{Location, Located, Token};
 
-pub(crate) type Tokens = Peekable<IntoIter<Token>>;
+pub(crate) type Tokens = Peekable<IntoIter<Located<Token>>>;
 
-pub(crate) fn parse(tokens: Vec<Token>) -> Vec<Expression> {
+pub(crate) fn parse(tokens: Vec<Located<Token>>) -> Vec<Expression> {
     let tokens = &mut tokens.into_iter().peekable();
     let mut top_level = Vec::new();
-    while let Some(token) = tokens.peek() {
-        if token.kind != TokenKind::EndOfFile {
+    while let Some(Located { data: peeked, ..}) = tokens.peek() {
+        if *peeked != Token::EndOfFile {
             let expression = parse_expression(tokens);
             top_level.push(expression);
         } else {
@@ -20,17 +20,17 @@ pub(crate) fn parse(tokens: Vec<Token>) -> Vec<Expression> {
 
 pub(crate) fn parse_expression(tokens: &mut Tokens) -> Expression {
     match tokens.next().expect(NO_EOF) {
-        Token {
+        Located {
             location,
-            kind: TokenKind::Let,
+            data: Token::Let,
         } => parse_binding_declaration(tokens, location),
-        Token {
+        Located {
             location,
-            kind: TokenKind::Integer(atom),
+            data: Token::Integer(atom),
         } => Expression::Literal((location, Literal::Integer(atom))),
-        Token {
+        Located {
             location,
-            kind: unexpected,
+            data: unexpected,
         } => Expression::Error(format!(
             "{} Error: Unexpected token '{:?}.'",
             location, unexpected
@@ -40,13 +40,13 @@ pub(crate) fn parse_expression(tokens: &mut Tokens) -> Expression {
 
 fn parse_binding_declaration(tokens: &mut Tokens, let_keyword: Location) -> Expression {
     let identifier = match tokens.next().expect(NO_EOF) {
-        Token {
+        Located {
             location,
-            kind: TokenKind::Identifier(atom),
+            data: Token::Identifier(atom),
         } => (location, atom),
-        Token {
+        Located {
             location,
-            kind: unexpected,
+            data: unexpected,
         } => {
             return Expression::Error(format!(
                 "{}: Error: Expected an identifier, but found '{:?}'.",
@@ -55,13 +55,13 @@ fn parse_binding_declaration(tokens: &mut Tokens, let_keyword: Location) -> Expr
         }
     };
     let assign = match tokens.next().expect(NO_EOF) {
-        Token {
+        Located {
             location,
-            kind: TokenKind::Assign,
+            data: Token::Assign,
         } => location,
-        Token {
+        Located {
             location,
-            kind: unexpected,
+            data: unexpected,
         } => {
             return Expression::Error(format!(
                 "{}: Error: Expected ':=', but found '{:?}'.",

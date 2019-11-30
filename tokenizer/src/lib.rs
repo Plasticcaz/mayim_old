@@ -4,17 +4,17 @@
 
 pub use string_cache::DefaultAtom as Atom;
 
-pub use crate::{location::Location, token::Token, token_kind::TokenKind};
+pub use crate::{location::Location, located::Located, token::Token};
 
 mod location;
+mod located;
 mod token;
-mod token_kind;
 mod tokenizer;
 
 ///
 /// Convert the `source` into a `Vec` of `Token`s associated with the specified `filename`.
 ///
-pub fn tokenize(filename: &str, source: &str) -> Vec<Token> {
+pub fn tokenize(filename: &str, source: &str) -> Vec<Located<Token>> {
     tokenizer::Tokenizer::new(filename, source).tokenize()
 }
 
@@ -22,12 +22,12 @@ pub fn tokenize(filename: &str, source: &str) -> Vec<Token> {
 mod tests {
     use std::vec::IntoIter;
 
-    use super::{tokenize, Atom, Token, TokenKind};
+    use super::{tokenize, Atom, Token, Located};
 
     const FILENAME: &str = "test.mayim";
 
-    fn assert_next_is(tokens: &mut IntoIter<Token>, expected: TokenKind) {
-        let got = tokens.next().map(|it| it.kind).unwrap();
+    fn assert_next_is(tokens: &mut IntoIter<Located<Token>>, expected: Token) {
+        let got = tokens.next().map(|it| it.data).unwrap();
         assert_eq!(got, expected);
     }
 
@@ -36,11 +36,11 @@ mod tests {
         let source = "let x := 3";
         let tokens = &mut tokenize(FILENAME, source).into_iter();
 
-        assert_next_is(tokens, TokenKind::Let);
-        assert_next_is(tokens, TokenKind::Identifier(Atom::from("x")));
-        assert_next_is(tokens, TokenKind::Assign);
-        assert_next_is(tokens, TokenKind::Integer(Atom::from("3")));
-        assert_next_is(tokens, TokenKind::EndOfFile);
+        assert_next_is(tokens, Token::Let);
+        assert_next_is(tokens, Token::Identifier(Atom::from("x")));
+        assert_next_is(tokens, Token::Assign);
+        assert_next_is(tokens, Token::Integer(Atom::from("3")));
+        assert_next_is(tokens, Token::EndOfFile);
         assert!(tokens.next().is_none());
     }
 }

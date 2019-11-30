@@ -7,7 +7,7 @@
 //! However, this module is internal to this crate. The end user should just be able to call the
 //! top-level `tokenize` function in lib.rs, and not care about this implementation detail.
 //!
-use crate::{Atom, Location, Token, TokenKind};
+use crate::{Atom, Location, Token, Located};
 use std::{iter::Peekable, str::Chars};
 
 #[derive(Debug)]
@@ -28,7 +28,7 @@ impl<'src> Tokenizer<'src> {
         }
     }
 
-    pub(crate) fn tokenize(mut self) -> Vec<Token> {
+    pub(crate) fn tokenize(mut self) -> Vec<Located<Token>> {
         let mut tokens = Vec::new();
 
         while let Some(c) = self.chars.peek().cloned() {
@@ -41,11 +41,11 @@ impl<'src> Tokenizer<'src> {
                 self.eat_while(char::is_alphanumeric);
                 let lexeme = &self.source[start..self.index];
                 let kind = match lexeme {
-                    "let" => TokenKind::Let,
-                    _ => TokenKind::Identifier(Atom::from(lexeme)),
+                    "let" => Token::Let,
+                    _ => Token::Identifier(Atom::from(lexeme)),
                 };
 
-                tokens.push(Token::new(location, kind));
+                tokens.push(Located::new(location, kind));
             } else if c.is_numeric() {
                 let read_decimal = &mut false;
                 self.eat_while(|c| {
@@ -59,27 +59,27 @@ impl<'src> Tokenizer<'src> {
 
                 let lexeme = Atom::from(&self.source[start..self.index]);
                 let kind = if *read_decimal {
-                    TokenKind::Decimal(lexeme)
+                    Token::Decimal(lexeme)
                 } else {
-                    TokenKind::Integer(lexeme)
+                    Token::Integer(lexeme)
                 };
 
-                tokens.push(Token::new(location, kind));
+                tokens.push(Located::new(location, kind));
             } else {
                 let kind = if self.eat(":=") {
-                    TokenKind::Assign
+                    Token::Assign
                 } else {
                     self.advance();
 
                     let lexeme = Atom::from(&self.source[start..self.index]);
-                    TokenKind::Unknown(lexeme)
+                    Token::Unknown(lexeme)
                 };
 
-                tokens.push(Token::new(location, kind));
+                tokens.push(Located::new(location, kind));
             }
         }
 
-        tokens.push(Token::new(self.location, TokenKind::EndOfFile));
+        tokens.push(Located::new(self.location, Token::EndOfFile));
 
         tokens
     }
