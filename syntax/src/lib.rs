@@ -15,7 +15,7 @@ pub fn parse(tokens: Vec<Located<Token>>) -> Vec<Expression> {
 #[cfg(test)]
 mod tests {
     use crate::{parse, Expression, Literal};
-    use tokenizer::{tokenize, Atom};
+    use tokenizer::tokenize;
 
     const FILENAME: &str = "test.mayim";
 
@@ -52,23 +52,21 @@ mod tests {
     fn should_parse_binding_declaration() {
         let source = "let x := 3";
 
-        let top_level = parse(tokenize(FILENAME, source));
+        let mut expressions = parse(tokenize(FILENAME, source)).into_iter();
 
-        let top = &top_level[0];
-        if let Expression::BindingDeclaration {
-            identifier: (_, identifier),
-            expression,
-            ..
-        } = &top
-        {
-            assert_eq!(identifier, "x");
-            if let Expression::Literal((_, literal)) = expression.as_ref() {
-                assert_eq!(literal, &Literal::Integer(Atom::from("3")))
-            } else {
-                panic!()
+        match expressions.next().unwrap() {
+            Expression::BindingDeclaration {
+                identifier: (_, identifier),
+                expression,
+                ..
+            } => {
+                assert_eq!(&identifier, "x");
+                match expression.as_ref() {
+                    Expression::Literal((_, Literal::Integer(atom))) => assert_eq!(atom, "3"),
+                    _ => assert!(false),
+                }
             }
-        } else {
-            panic!()
+            _ => assert!(false)
         }
     }
 }
