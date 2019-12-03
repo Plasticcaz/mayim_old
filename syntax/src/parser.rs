@@ -43,9 +43,9 @@ pub(crate) fn parse_expression(tokens: &mut Tokens) -> Expression {
         Located {
             location,
             data: unexpected,
-        } => Expression::Error(format!(
-            "{} Error: Unexpected token '{:?}.'",
-            location, unexpected
+        } => Expression::Error(Located::new(
+            location,
+            format!("Unexpected token '{:?}.'", unexpected),
         )),
     }
 }
@@ -60,9 +60,9 @@ fn parse_binding_declaration(tokens: &mut Tokens, let_keyword: Location) -> Expr
             location,
             data: unexpected,
         } => {
-            return Expression::Error(format!(
-                "{}: Error: Expected an identifier, but found '{:?}'.",
-                location, unexpected
+            return Expression::Error(Located::new(
+                location,
+                format!("Expected an identifier, but found '{:?}'.", unexpected),
             ));
         }
     };
@@ -75,9 +75,9 @@ fn parse_binding_declaration(tokens: &mut Tokens, let_keyword: Location) -> Expr
             location,
             data: unexpected,
         } => {
-            return Expression::Error(format!(
-                "{}: Error: Expected ':=', but found '{:?}'.",
-                location, unexpected
+            return Expression::Error(Located::new(
+                location,
+                format!("Expected ':=', but found '{:?}'.", unexpected),
             ));
         }
     };

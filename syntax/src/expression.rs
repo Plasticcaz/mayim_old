@@ -17,7 +17,7 @@ pub enum Expression {
     ///
     /// Error encountered when trying to parse this expression node.
     ///
-    Error(String),
+    Error(Located<String>),
 }
 
 ///
