@@ -8,7 +8,5 @@ used in a language server, or in a text editor plugin, or the like.
 
 * mayimc
   - A binary that does the driving of compiling a `.mayim` source file.
-* tokenizer
-  - A library that converts a source file into a list of tokens.
 * syntax
-  - A library that handles converting a list of tokens into a list of statements.
+  - A library that handles converting a source file into a list of top-level expressions.
