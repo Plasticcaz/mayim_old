@@ -1,4 +1,4 @@
-use tokenizer::{Atom, Located, Location};
+use crate::{Atom, Located, Location};
 
 ///
 /// The fundamental larger unit of code in `mayim`. In `mayim`, everything is an expression,

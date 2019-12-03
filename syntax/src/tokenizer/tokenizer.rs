@@ -7,7 +7,7 @@
 //! However, this module is internal to this crate. The end user should just be able to call the
 //! top-level `tokenize` function in lib.rs, and not care about this implementation detail.
 //!
-use crate::{Atom, Located, Location, Token};
+use crate::tokenizer::{Atom, Located, Location, Token};
 use std::{iter::Peekable, str::Chars};
 
 #[derive(Debug)]

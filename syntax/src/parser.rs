@@ -1,6 +1,5 @@
-use crate::{Expression, Literal};
+use crate::{Expression, Literal, Located, Location, Token};
 use std::{iter::Peekable, vec::IntoIter};
-use tokenizer::{Located, Location, Token};
 
 pub(crate) type Tokens = Peekable<IntoIter<Located<Token>>>;
 
@@ -12,6 +11,7 @@ pub(crate) fn parse(tokens: Vec<Located<Token>>) -> Vec<Expression> {
             let expression = parse_expression(tokens);
             top_level.push(expression);
         } else {
+            // Eat the EOF file. We can ignore it.
             let _ = tokens.next();
         }
     }

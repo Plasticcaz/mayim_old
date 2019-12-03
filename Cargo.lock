@@ -9,7 +9,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "mayimc"
 version = "0.1.0"
 dependencies = [
- "tokenizer 0.1.0",
+ "syntax 0.1.0",
 ]
 
 [[package]]
@@ -54,13 +54,6 @@ dependencies = [
 
 [[package]]
 name = "syntax"
-version = "0.1.0"
-dependencies = [
- "tokenizer 0.1.0",
-]
-
-[[package]]
-name = "tokenizer"
 version = "0.1.0"
 dependencies = [
  "string_cache 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
