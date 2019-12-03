@@ -27,15 +27,19 @@ pub(crate) fn parse_expression(tokens: &mut Tokens) -> Expression {
         Located {
             location,
             data: Token::Decimal(atom),
-        } => Expression::Literal((location, Literal::Decimal(atom))),
+        } => Expression::Literal(Located::new(location, Literal::Decimal(atom))),
         Located {
             location,
             data: Token::Integer(atom),
-        } => Expression::Literal((location, Literal::Integer(atom))),
+        } => Expression::Literal(Located::new(location, Literal::Integer(atom))),
+        Located {
+            location,
+            data: Token::Identifier(atom),
+        } => Expression::Identifier(Located::new(location, atom)),
         Located {
             location,
             data: Token::Boolean(atom),
-        } => Expression::Literal((location, Literal::Boolean(atom))),
+        } => Expression::Literal(Located::new(location, Literal::Boolean(atom))),
         Located {
             location,
             data: unexpected,
@@ -51,7 +55,7 @@ fn parse_binding_declaration(tokens: &mut Tokens, let_keyword: Location) -> Expr
         Located {
             location,
             data: Token::Identifier(atom),
-        } => (location, atom),
+        } => Located::new(location, atom),
         Located {
             location,
             data: unexpected,

@@ -37,8 +37,8 @@ impl<'src> Tokenizer<'src> {
 
             if c.is_whitespace() {
                 self.eat_while(char::is_whitespace);
-            } else if c.is_alphabetic() {
-                self.eat_while(char::is_alphanumeric);
+            } else if c.is_alphabetic() || c == '_' {
+                self.eat_while(|c| c.is_alphanumeric() || c == '_');
                 let lexeme = &self.source[start..self.index];
                 let kind = match lexeme {
                     "let" => Token::Let,

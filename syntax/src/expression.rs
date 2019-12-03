@@ -1,4 +1,4 @@
-use tokenizer::{Atom, Location};
+use tokenizer::{Atom, Located, Location};
 
 ///
 /// The fundamental larger unit of code in `mayim`. In `mayim`, everything is an expression,
@@ -8,11 +8,12 @@ use tokenizer::{Atom, Location};
 pub enum Expression {
     BindingDeclaration {
         let_keyword: Location,
-        identifier: (Location, Atom),
+        identifier: Located<Atom>,
         assign: Location,
         expression: Box<Expression>,
     },
-    Literal((Location, Literal)),
+    Literal(Located<Literal>),
+    Identifier(Located<Atom>),
     ///
     /// Error encountered when trying to parse this expression node.
     ///
