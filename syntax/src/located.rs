@@ -1,4 +1,4 @@
-use crate::tokenizer::Location;
+use crate::Location;
 use std::fmt;
 
 #[derive(Debug)]
