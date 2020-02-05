@@ -12,7 +12,7 @@ mod tokenizer;
 pub use string_cache::DefaultAtom as Atom;
 
 pub use crate::{
-    expression::{Error, Expression},
+    expression::{BindingDeclaration, Error, Expression},
     location::Location,
     token::{AtomToken, Token},
     tokenizer::tokenize,

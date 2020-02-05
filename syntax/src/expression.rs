@@ -10,6 +10,7 @@ pub enum Expression {
     Identifier(AtomToken),
     IntegerLiteral(AtomToken),
     DecimalLiteral(AtomToken),
+    BindingDeclaration(Box<BindingDeclaration>),
     Error(Error),
 }
 
@@ -20,9 +21,18 @@ impl Expression {
             IntegerLiteral(token)
             | DecimalLiteral(token)
             | Identifier(token) => token.location.clone(),
+            BindingDeclaration(declaration) => declaration.let_keyword.clone(),
             Error(error) => error.location.clone(),
         }
     }
+}
+
+#[derive(Debug)]
+pub struct BindingDeclaration {
+    pub let_keyword: Location,
+    pub identifier: AtomToken,
+    pub assign_operator: Location,
+    pub initialized_to: Expression,
 }
 
 #[derive(Debug)]

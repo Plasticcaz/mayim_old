@@ -1,5 +1,5 @@
 use crate::expression::Error;
-use crate::{AtomToken, Expression, Token};
+use crate::{AtomToken, BindingDeclaration, Expression, Location, Token};
 use std::{fmt, vec::IntoIter};
 
 pub struct Tokens {
@@ -69,13 +69,39 @@ pub(crate) fn parse_expression(tokens: &mut Tokens) -> Expression {
         Token::Identifier(identifier) => {
             parse_identifier_expression(tokens, identifier)
         }
+        Token::Let(let_location) => {
+            parse_binding_expression(tokens, let_location)
+        }
         Token::Integer(literal) => Expression::IntegerLiteral(literal),
         Token::Decimal(literal) => Expression::DecimalLiteral(literal),
-        unknown => Expression::Error(Error::new(
-            unknown.location().clone(),
-            format!("Unexpected token: {}", unknown.description()),
-        )),
+        unknown => unexpected_token(unknown),
     }
+}
+
+fn parse_binding_expression(
+    tokens: &mut Tokens,
+    let_location: Location,
+) -> Expression {
+    let identifier = match tokens.next() {
+        Token::Identifier(identifier) => identifier,
+        unexpected => return unexpected_token(unexpected),
+    };
+
+    let assign_operator = match tokens.next() {
+        Token::Assign(assignment_location) => assignment_location,
+        unexpected => return unexpected_token(unexpected),
+    };
+
+    let initialized_to = parse_expression(tokens);
+
+    let declaration = BindingDeclaration {
+        let_keyword: let_location,
+        identifier,
+        assign_operator,
+        initialized_to,
+    };
+
+    Expression::BindingDeclaration(Box::new(declaration))
 }
 
 fn parse_identifier_expression(
@@ -89,4 +115,11 @@ fn parse_identifier_expression(
             Expression::Identifier(identifier)
         }
     }
+}
+
+fn unexpected_token(token: Token) -> Expression {
+    Expression::Error(Error::new(
+        token.location().clone(),
+        format!("Unexpected token: {}", token.description()),
+    ))
 }
