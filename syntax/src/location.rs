@@ -13,6 +13,8 @@ pub struct Location {
 
 impl Location {
     pub fn new(filename: Atom, line: u32, column: u32) -> Self {
+        debug_assert!(line > 0);
+        debug_assert!(column > 0);
         Location {
             filename,
             line,

@@ -1,31 +1,32 @@
-use crate::{Atom, Located, Location};
+use crate::{Atom, AtomToken, Location};
 
 ///
 /// The fundamental larger unit of code in `mayim`. In `mayim`, everything is an expression,
 /// from a simple literal to a function declaration.
 ///
+
 #[derive(Debug)]
 pub enum Expression {
-    BindingDeclaration {
-        let_keyword: Location,
-        identifier: Located<Atom>,
-        assign: Location,
-        expression: Box<Expression>,
-    },
-    Literal(Located<Literal>),
-    Identifier(Located<Atom>),
-    ///
-    /// Error encountered when trying to parse this expression node.
-    ///
-    Error(Located<String>),
+    Identifier(AtomToken),
+    IntegerLiteral(AtomToken),
+    DecimalLiteral(AtomToken),
+    Error(Error),
 }
 
-///
-/// The different types of Literal exrpessions.
-///
-#[derive(Debug, Eq, PartialEq)]
-pub enum Literal {
-    Integer(Atom),
-    Decimal(Atom),
-    Boolean(Atom),
+impl Expression {
+    fn location(&self) -> Location {
+        use Expression::*;
+        match self {
+            IntegerLiteral(token)
+            | DecimalLiteral(token)
+            | Identifier(token) => token.location.clone(),
+            Error(error) => error.location.clone(),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct Error {
+    location: Location,
+    message: String,
 }

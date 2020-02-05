@@ -7,13 +7,13 @@
 //! However, this module is internal to this crate. The end user should just be able to call the
 //! top-level `tokenize` function in lib.rs, and not care about this implementation detail.
 //!
-use crate::{Atom, Located, Location, Token};
+use crate::{Atom, AtomToken, Location, Token};
 use std::{iter::Peekable, str::Chars};
 
 ///
 /// Convert the `source` into a `Vec` of `Token`s associated with the specified `filename`.
 ///
-pub fn tokenize(filename: &str, source: &str) -> Vec<Located<Token>> {
+pub fn tokenize(filename: &str, source: &str) -> Vec<Token> {
     Tokenizer::new(filename, source).tokenize()
 }
 
@@ -35,7 +35,7 @@ impl<'src> Tokenizer<'src> {
         }
     }
 
-    pub(crate) fn tokenize(mut self) -> Vec<Located<Token>> {
+    pub(crate) fn tokenize(mut self) -> Vec<Token> {
         let mut tokens = Vec::new();
 
         while let Some(c) = self.chars.peek().cloned() {
@@ -47,13 +47,19 @@ impl<'src> Tokenizer<'src> {
             } else if c.is_alphabetic() || c == '_' {
                 self.eat_while(|c| c.is_alphanumeric() || c == '_');
                 let lexeme = &self.source[start..self.index];
-                let kind = match lexeme {
-                    "let" => Token::Let,
-                    "true" | "false" => Token::Boolean(Atom::from(lexeme)),
-                    _ => Token::Identifier(Atom::from(lexeme)),
+                let token = match lexeme {
+                    "let" => Token::Let(location),
+                    "true" | "false" => Token::Boolean(AtomToken::new(
+                        location,
+                        Atom::from(lexeme),
+                    )),
+                    _ => Token::Identifier(AtomToken::new(
+                        location,
+                        Atom::from(lexeme),
+                    )),
                 };
 
-                tokens.push(Located::new(location, kind));
+                tokens.push(token);
             } else if c.is_numeric() {
                 let read_decimal = &mut false;
                 self.eat_while(|c| {
@@ -66,28 +72,28 @@ impl<'src> Tokenizer<'src> {
                 });
 
                 let lexeme = Atom::from(&self.source[start..self.index]);
-                let kind = if *read_decimal {
-                    Token::Decimal(lexeme)
+                let token = if *read_decimal {
+                    Token::Decimal(AtomToken::new(location, lexeme))
                 } else {
-                    Token::Integer(lexeme)
+                    Token::Integer(AtomToken::new(location, lexeme))
                 };
 
-                tokens.push(Located::new(location, kind));
+                tokens.push(token);
             } else {
-                let kind = if self.eat(":=") {
-                    Token::Assign
+                let token = if self.eat(":=") {
+                    Token::Assign(location)
                 } else {
                     self.advance();
 
                     let lexeme = Atom::from(&self.source[start..self.index]);
-                    Token::Unknown(lexeme)
+                    Token::Unknown(AtomToken::new(location, lexeme))
                 };
 
-                tokens.push(Located::new(location, kind));
+                tokens.push(token);
             }
         }
 
-        tokens.push(Located::new(self.location, Token::EndOfFile));
+        tokens.push(Token::EndOfFile(self.location));
 
         tokens
     }

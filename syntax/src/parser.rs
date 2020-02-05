@@ -1,95 +1,88 @@
-use crate::{Expression, Literal, Located, Location, Token};
-use std::{iter::Peekable, vec::IntoIter};
+use crate::{AtomToken, Expression, Token};
+use std::{fmt, vec::IntoIter};
 
-pub(crate) type Tokens = Peekable<IntoIter<Located<Token>>>;
+pub struct Tokens {
+    iterator: IntoIter<Token>,
+    next: Option<Token>,
+}
 
-pub(crate) fn parse(tokens: Vec<Located<Token>>) -> Vec<Expression> {
-    let tokens = &mut tokens.into_iter().peekable();
-    let mut top_level = Vec::new();
-    while let Some(Located { data: peeked, .. }) = tokens.peek() {
-        if *peeked != Token::EndOfFile {
-            let expression = parse_expression(tokens);
-            top_level.push(expression);
-        } else {
-            // Eat the EOF file. We can ignore it.
-            let _ = tokens.next();
+impl Tokens {
+    pub fn new(iterator: IntoIter<Token>) -> Tokens {
+        Tokens {
+            iterator,
+            next: None,
         }
     }
-    top_level
+
+    pub fn next(&mut self) -> Token {
+        self.next
+            .take()
+            .or_else(|| self.iterator.next())
+            .expect("Expected at least an EndOfFile token at this point.")
+    }
+
+    pub fn has_next(&mut self) -> bool {
+        self.next.is_some() || {
+            if let Some(token) = self.iterator.next() {
+                self.put_back(token);
+                true
+            } else {
+                false
+            }
+        }
+    }
+
+    pub fn put_back(&mut self, token: Token) {
+        // TODO(zac): Is there a way to enforce this? Maybe by performing an action inside a closure?
+        assert!(self.next.is_none());
+        self.next = Some(token)
+    }
+}
+
+macro_rules! match_enum_instance {
+    ($t:expr, $q:path) => {
+        match $t {
+            $q(c) => Some(c),
+            _ => None,
+        }
+    };
+}
+
+pub(crate) fn parse(tokens: Vec<Token>) -> Vec<Expression> {
+    let tokens = &mut Tokens::new(tokens.into_iter());
+
+    let mut expressions = Vec::new();
+
+    while tokens.has_next() {
+        let token = tokens.next();
+        if match_enum_instance!(&token, Token::EndOfFile).is_none() {
+            tokens.put_back(token);
+            expressions.push(parse_expression(tokens))
+        }
+    }
+    expressions
 }
 
 pub(crate) fn parse_expression(tokens: &mut Tokens) -> Expression {
-    match tokens.next().expect(NO_EOF) {
-        Located {
-            location,
-            data: Token::Let,
-        } => parse_binding_declaration(tokens, location),
-        Located {
-            location,
-            data: Token::Decimal(atom),
-        } => Expression::Literal(Located::new(location, Literal::Decimal(atom))),
-        Located {
-            location,
-            data: Token::Integer(atom),
-        } => Expression::Literal(Located::new(location, Literal::Integer(atom))),
-        Located {
-            location,
-            data: Token::Identifier(atom),
-        } => Expression::Identifier(Located::new(location, atom)),
-        Located {
-            location,
-            data: Token::Boolean(atom),
-        } => Expression::Literal(Located::new(location, Literal::Boolean(atom))),
-        Located {
-            location,
-            data: unexpected,
-        } => Expression::Error(Located::new(
-            location,
-            format!("Unexpected token '{:?}.'", unexpected),
-        )),
+    match tokens.next() {
+        Token::Identifier(identifier) => {
+            parse_identifier_expression(tokens, identifier)
+        }
+        Token::Integer(literal) => Expression::IntegerLiteral(literal),
+        Token::Decimal(literal) => Expression::DecimalLiteral(literal),
+        unknown => todo!(),
     }
 }
 
-fn parse_binding_declaration(tokens: &mut Tokens, let_keyword: Location) -> Expression {
-    let identifier = match tokens.next().expect(NO_EOF) {
-        Located {
-            location,
-            data: Token::Identifier(atom),
-        } => Located::new(location, atom),
-        Located {
-            location,
-            data: unexpected,
-        } => {
-            return Expression::Error(Located::new(
-                location,
-                format!("Expected an identifier, but found '{:?}'.", unexpected),
-            ));
+fn parse_identifier_expression(
+    tokens: &mut Tokens,
+    identifier: AtomToken,
+) -> Expression {
+    match tokens.next() {
+        // TODO(zac): Check to see if it's another type of expression that starts with an identifier.
+        other_token => {
+            tokens.put_back(other_token);
+            Expression::Identifier(identifier)
         }
-    };
-    let assign = match tokens.next().expect(NO_EOF) {
-        Located {
-            location,
-            data: Token::Assign,
-        } => location,
-        Located {
-            location,
-            data: unexpected,
-        } => {
-            return Expression::Error(Located::new(
-                location,
-                format!("Expected ':=', but found '{:?}'.", unexpected),
-            ));
-        }
-    };
-
-    let expression = parse_expression(tokens);
-
-    Expression::BindingDeclaration {
-        let_keyword,
-        identifier,
-        assign,
-        expression: Box::new(expression),
     }
 }
-
-const NO_EOF: &str = "Expected at least an EndOfFile token at this point.";

@@ -2,7 +2,6 @@
 //! This crate handles tokenizing and parsing a `mayim` source file into a `Vec` of `Expression`s.
 //!
 mod expression;
-mod located;
 mod location;
 mod parser;
 #[cfg(test)]
@@ -13,11 +12,10 @@ mod tokenizer;
 pub use string_cache::DefaultAtom as Atom;
 
 pub use crate::{
-    expression::{Expression, Literal},
-    tokenizer::tokenize,
-    located::Located,
+    expression::Expression,
     location::Location,
-    token::Token
+    token::{AtomToken, Token},
+    tokenizer::tokenize,
 };
 
 pub fn parse(filename: &str, source: &str) -> Vec<Expression> {

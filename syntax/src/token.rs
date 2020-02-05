@@ -1,21 +1,41 @@
+use crate::Location;
 use string_cache::DefaultAtom as Atom;
 
-///
-/// A `Token` is an individual lexeme in source file that has been identified as having
-/// particular importance to the mayim compiler.
-///
-/// Certain `Token`s contain an Atom which can be used to distinguish one such token from another.
-/// For instance `Token::Identifier(_)` contains an `Atom` which contains the particular
-/// identifier that this token contains.
-///
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone)]
 pub enum Token {
-    EndOfFile,
-    Unknown(Atom),
-    Identifier(Atom),
-    Integer(Atom),
-    Decimal(Atom),
-    Boolean(Atom),
-    Let,
-    Assign,
+    EndOfFile(Location),
+    Unknown(AtomToken),
+    Identifier(AtomToken),
+    Boolean(AtomToken),
+    Integer(AtomToken),
+    Decimal(AtomToken),
+    Let(Location),
+    Assign(Location),
+}
+
+impl Token {
+    pub fn location(&self) -> &Location {
+        match self {
+            Token::EndOfFile(location)
+            | Token::Let(location)
+            | Token::Assign(location) => location,
+            Token::Unknown(token)
+            | Token::Boolean(token)
+            | Token::Integer(token)
+            | Token::Decimal(token)
+            | Token::Identifier(token) => &token.location,
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct AtomToken {
+    pub location: Location,
+    pub atom: Atom,
+}
+
+impl AtomToken {
+    pub fn new(location: Location, atom: Atom) -> AtomToken {
+        AtomToken { location, atom }
+    }
 }
