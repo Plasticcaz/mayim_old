@@ -80,7 +80,7 @@ impl<'src> Tokenizer<'src> {
 
                 tokens.push(token);
             } else {
-                let token = if self.eat(":=") {
+                let token = if self.eat("=") {
                     Token::Assign(location)
                 } else {
                     self.advance();

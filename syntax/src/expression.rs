@@ -27,6 +27,15 @@ impl Expression {
 
 #[derive(Debug)]
 pub struct Error {
-    location: Location,
-    message: String,
+    pub location: Location,
+    pub message: String,
+}
+
+impl Error {
+    pub fn new<Msg: Into<String>>(location: Location, message: Msg) -> Error {
+        Error {
+            location,
+            message: message.into(),
+        }
+    }
 }

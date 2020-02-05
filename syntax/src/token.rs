@@ -26,6 +26,16 @@ impl Token {
             | Token::Identifier(token) => &token.location,
         }
     }
+
+    pub fn description(&self) -> String {
+        match self {
+            Token::EndOfFile(_) => "EOF",
+            Token::Let(_) => "let",
+            Token::Assign(_) => "assignment",
+            _ => todo!(),
+        }
+        .into()
+    }
 }
 
 #[derive(Debug, Clone)]

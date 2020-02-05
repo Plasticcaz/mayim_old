@@ -2,7 +2,7 @@
 //! This file contains crate-level tests of the mayim `syntax` crate. This does not mean all tests
 //! are found here, but behaviour-based tests of the crate as a whole are contained here.
 //!
-use crate::{parse, AtomToken, Expression};
+use crate::{parse, AtomToken, Error, Expression};
 
 const FILENAME: &str = "test.mayim";
 
@@ -47,5 +47,20 @@ fn should_parse_numeric_expressions() {
         expressions.next(),
         Expression::DecimalLiteral,
         |AtomToken { atom, .. }: AtomToken| { assert_eq!(&atom, "3.14") }
+    );
+}
+
+#[test]
+fn should_return_error_if_assignment_token_at_start_of_expression() {
+    let source = "=";
+
+    let mut expressions = parse(FILENAME, source).into_iter();
+
+    expect_some_instance!(
+        expressions.next(),
+        Expression::Error,
+        |Error { message, .. }: Error| {
+            assert!(message.contains("Unexpected token"))
+        }
     );
 }

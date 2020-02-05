@@ -1,3 +1,4 @@
+use crate::expression::Error;
 use crate::{AtomToken, Expression, Token};
 use std::{fmt, vec::IntoIter};
 
@@ -70,7 +71,10 @@ pub(crate) fn parse_expression(tokens: &mut Tokens) -> Expression {
         }
         Token::Integer(literal) => Expression::IntegerLiteral(literal),
         Token::Decimal(literal) => Expression::DecimalLiteral(literal),
-        unknown => todo!(),
+        unknown => Expression::Error(Error::new(
+            unknown.location().clone(),
+            format!("Unexpected token: {}", unknown.description()),
+        )),
     }
 }
 
